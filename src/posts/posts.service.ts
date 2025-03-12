@@ -31,7 +31,7 @@ export class PostsService {
       ...createPostDto,
       userId,
     });
-    return createdPost.save();
+    return await createdPost.save();
   }
 
   // Update a post - Protected
@@ -54,14 +54,19 @@ export class PostsService {
   }
 
   // Delete a post - Protected
-  async delete(id: string, userId: string): Promise<void> {
-    const post = await this.postModel.findById(id);
-    if (!post) {
-      throw new Error('Post not found');
+  async delete(id: string, userId: string): Promise<any> {
+    try {
+      const post = await this.postModel.findById(id);
+      if (!post) {
+        throw new Error('Post not found');
+      }
+      if (post.userId !== userId) {
+        throw new Error('You can only delete your own posts');
+      }
+      await this.postModel.deleteOne({ _id: id }).exec();
+      return { message: 'Post Deleted successfully' };
+    } catch (error) {
+      throw new Error(error.message);
     }
-    if (post.userId !== userId) {
-      throw new Error('You can only delete your own posts');
-    }
-    await this.postModel.deleteOne({ _id: id }).exec();
   }
 }

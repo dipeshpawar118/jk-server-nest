@@ -30,7 +30,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     done: VerifyCallback,
   ): Promise<any> {
     const user = await this.usersService.findOrCreate(profile);
-    const token = await this.authService.validateOAuthLogin(profile);
+    const token = await this.authService.validateOAuthLogin(user);
     return { user, token };
   }
 }
