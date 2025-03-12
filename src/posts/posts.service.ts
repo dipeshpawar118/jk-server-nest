@@ -5,28 +5,35 @@ import { Model } from 'mongoose';
 import { Post } from './post.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { CustomLogger } from '../logger/logger.service';
 
 @Injectable()
 export class PostsService {
+  private readonly logger = new CustomLogger();
+
   constructor(@InjectModel(Post.name) private postModel: Model<Post>) {}
 
   // Get all posts - Public
   async getAll(): Promise<Post[]> {
+    this.logger.log('Fetching all posts');
     return this.postModel.find().exec();
   }
 
   // Get post details by ID - Public
   async getDetails(id: string): Promise<Post | null> {
+    this.logger.log(`Fetching details for post ID: ${id}`);
     return this.postModel.findById(id).exec();
   }
 
   // Get post details by userId - Protected
   async getPostByUserId(id: string): Promise<Post[]> {
+    this.logger.log(`Fetching posts for user ID: ${id}`);
     return this.postModel.find({ userId: id }).exec();
   }
 
   // Create a new post - Protected
   async create(createPostDto: CreatePostDto, userId: string): Promise<Post> {
+    this.logger.log(`Creating a new post for user ID: ${userId}`);
     const createdPost = new this.postModel({
       ...createPostDto,
       userId,
@@ -40,6 +47,7 @@ export class PostsService {
     updatePostDto: UpdatePostDto,
     userId: string,
   ): Promise<Post> {
+    this.logger.log(`Updating post ID: ${id} for user ID: ${userId}`);
     const post = await this.postModel.findById(id);
     if (!post) {
       throw new Error('Post not found');
@@ -55,6 +63,7 @@ export class PostsService {
 
   // Delete a post - Protected
   async delete(id: string, userId: string): Promise<any> {
+    this.logger.log(`Deleting post ID: ${id} for user ID: ${userId}`);
     try {
       const post = await this.postModel.findById(id);
       if (!post) {
